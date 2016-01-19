@@ -21,19 +21,23 @@ func NewFakeTicker(clock clock.Clock, d time.Duration) clock.Ticker {
 	channel := make(chan time.Time)
 	timer := clock.NewTimer(d)
 
-	go func() {
-		for {
-			time := <-timer.C()
-			timer.Reset(d)
-			channel <- time
-		}
-	}()
-
-	return &fakeTicker{
+	ft := fakeTicker{
 		clock:    clock,
 		duration: d,
 		channel:  channel,
 		timer:    timer,
+	}
+
+	go ft.run()
+
+	return &ft
+}
+
+func (ft *fakeTicker) run() {
+	for {
+		time := <-ft.timer.C()
+		ft.timer = ft.clock.NewTimer(ft.duration)
+		ft.channel <- time
 	}
 }
 

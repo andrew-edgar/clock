@@ -61,10 +61,7 @@ func (ft *fakeTimer) timeUpdated(now time.Time) {
 	ft.mutex.Unlock()
 
 	if fire {
-		select {
-		case ft.channel <- now:
-			ft.Stop()
-		default:
-		}
+		ft.Stop()
+		ft.channel <- now
 	}
 }
